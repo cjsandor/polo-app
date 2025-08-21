@@ -19,13 +19,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.cjsandor.passionforpolo"
     },
-    "android": {
-      "package": "com.yourcompany.polomatchtracker",
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      }
-    },
+
     "web": {
       "bundler": "metro",
       "output": "static",
