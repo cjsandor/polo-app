@@ -14,6 +14,12 @@
         "env": { "EAS_PROJECT_ID": "028c4ebb-6add-4483-a07f-0a2b22ba967f" }
       }
     },
-    "submit": { "production": {} }
+    "submit": {
+      "production": {
+        "ios": {
+          "ascAppId": "6751362915"
+        }
+      }
+    }
   }
   

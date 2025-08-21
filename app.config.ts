@@ -44,6 +44,9 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.cjsandor.passionforpolo",
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
+      },
     },
     android: {
       package: "com.cjsandor.passionforpolo",
