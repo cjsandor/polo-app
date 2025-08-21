@@ -18,19 +18,19 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
-import { LoadingSpinner } from "../../../src/components/ui/LoadingSpinner";
-import { MatchCard } from "../../../src/components/ui/MatchCard";
-import { COLORS, POLO } from "../../../src/config/constants";
-import type { Match, Player } from "../../../src/types/database";
+import { LoadingSpinner } from "../../../../src/components/ui/LoadingSpinner";
+import { MatchCard } from "../../../../src/components/ui/MatchCard";
+import { COLORS, POLO } from "../../../../src/config/constants";
+import type { Match, Player } from "../../../../src/types/database";
 import {
   useGetTeamByIdQuery,
   useGetTeamStatsQuery,
   useFollowTeamMutation,
   useUnfollowTeamMutation,
   useGetFollowedTeamsQuery,
-} from "../../../src/store/api/slices/teamsApi";
-import { useGetMatchesForTeamQuery } from "../../../src/store/api/slices/matchesApi";
-import { useAuthContext } from "../../../src/contexts/AuthContext";
+} from "../../../../src/store/api/slices/teamsApi";
+import { useGetMatchesForTeamQuery } from "../../../../src/store/api/slices/matchesApi";
+import { useAuthContext } from "../../../../src/contexts/AuthContext";
 
 export default function TeamDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -105,7 +105,7 @@ export default function TeamDetailScreen() {
   const renderPlayer = ({ item }: { item: Player }) => (
     <TouchableOpacity
       style={styles.playerRow}
-      onPress={() => router.push(`/players/${item.id}`)}
+      onPress={() => router.push(`/(app)/(tabs)/players/${item.id}`)}
     >
       <View style={styles.playerAvatarSm}>
         <Ionicons name="person" size={16} color={COLORS.PRIMARY} />
@@ -199,7 +199,7 @@ export default function TeamDetailScreen() {
             renderItem={({ item }: { item: Match }) => (
               <MatchCard
                 match={item}
-                onPress={() => router.push(`/matches/${item.id}`)}
+                onPress={() => router.push(`/(app)/(tabs)/matches/${item.id}`)}
               />
             )}
             ListEmptyComponent={() => (

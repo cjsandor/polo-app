@@ -5,7 +5,7 @@
  * - Team lineups display
  */
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -13,21 +13,32 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
+  FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 
-import { LoadingSpinner } from "../../../src/components/ui/LoadingSpinner";
-import { COLORS, POLO } from "../../../src/config/constants";
+import { LoadingSpinner } from "../../../../src/components/ui/LoadingSpinner";
+import { SafeModal } from "../../../../src/components/ui/SafeModal";
+import { COLORS, POLO } from "../../../../src/config/constants";
 import type {
   MatchLineup,
   MatchWithDetails,
-} from "../../../src/types/database";
-import { useGetMatchByIdQuery } from "../../../src/store/api/slices/matchesApi";
-import { useGetGoalEventsQuery } from "../../../src/store/api/slices/matchEventsApi";
+} from "../../../../src/types/database";
+import {
+  useGetMatchByIdQuery,
+  useUpdateMatchStatusMutation,
+} from "../../../../src/store/api/slices/matchesApi";
+import {
+  useGetGoalEventsQuery,
+  useCreateMatchEventMutation,
+  useUndoLastEventMutation,
+} from "../../../../src/store/api/slices/matchEventsApi";
+import { useIsAdmin } from "../../../../src/store/hooks";
 
 export default function MatchDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const isAdmin = useIsAdmin();
 
   const {
     data: match,
@@ -35,12 +46,36 @@ export default function MatchDetailScreen() {
     refetch: refetchMatch,
   } = useGetMatchByIdQuery(id as string, { skip: !id });
 
+  // Debug log match data
+  React.useEffect(() => {
+    if (match) {
+      console.log("Match data loaded:", {
+        id: match.id,
+        lineups_count: match.match_lineups?.length || 0,
+        first_lineup: match.match_lineups?.[0],
+        has_player_data: match.match_lineups?.[0]?.player ? "YES" : "NO",
+      });
+    }
+  }, [match]);
+
   const { data: goalEvents, isLoading: goalsLoading } = useGetGoalEventsQuery(
     id as string,
     { skip: !id }
   );
 
   const isLoading = matchLoading || goalsLoading;
+
+  const [createEvent, { isLoading: creatingEvent }] =
+    useCreateMatchEventMutation();
+  const [undoLast, { isLoading: undoing }] = useUndoLastEventMutation();
+  const [updateStatus, { isLoading: updatingStatus }] =
+    useUpdateMatchStatusMutation();
+
+  // Player picker modal state
+  const [pickerVisible, setPickerVisible] = useState<null | {
+    teamId: string;
+    teamLabel: string;
+  }>(null);
 
   const homeTotal = useMemo(() => {
     if (!match) return 0;
@@ -79,6 +114,188 @@ export default function MatchDetailScreen() {
       arr.sort((a, b) => (a.position || 99) - (b.position || 99))
     );
     return byTeam;
+  };
+
+  const renderAdminControls = () => {
+    if (!isAdmin || !match) return null;
+
+    const onAddGoal = async (team: "home" | "away", playerId?: string) => {
+      try {
+        await createEvent({
+          match_id: match.id,
+          event_type: "goal",
+          team_id:
+            team === "home"
+              ? match.home_team?.id || match.home_team_id
+              : match.away_team?.id || match.away_team_id,
+          player_id: playerId,
+          chukker: Math.max(1, match.current_chukker || 1),
+        }).unwrap();
+        // refetch handled by invalidation
+      } catch (e) {
+        // noop
+      }
+    };
+
+    const onUndo = async () => {
+      try {
+        await undoLast(match.id).unwrap();
+      } catch {}
+    };
+
+    const onStartNextChukker = async () => {
+      const next = (match.current_chukker || 0) + 1;
+      const clamped = Math.min(next, match.total_chukkers);
+      try {
+        await updateStatus({
+          id: match.id,
+          status: "live",
+          currentChukker: clamped,
+        }).unwrap();
+      } catch {}
+    };
+
+    const onEndMatch = async () => {
+      try {
+        await updateStatus({ id: match.id, status: "completed" }).unwrap();
+      } catch {}
+    };
+
+    const openPicker = (team: "home" | "away") => {
+      const teamId =
+        team === "home"
+          ? match.home_team?.id || match.home_team_id
+          : match.away_team?.id || match.away_team_id;
+      const teamLabel =
+        team === "home"
+          ? match.home_team?.name || "Home"
+          : match.away_team?.name || "Away";
+      setPickerVisible({ teamId: teamId!, teamLabel });
+    };
+
+    const byTeam = groupLineups(match.match_lineups);
+    const pickerList = pickerVisible ? byTeam[pickerVisible.teamId] || [] : [];
+
+    return (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Admin Controls</Text>
+        <View style={styles.adminRow}>
+          <TouchableOpacity
+            style={styles.adminBtn}
+            onPress={() => openPicker("home")}
+            disabled={creatingEvent}
+          >
+            <Ionicons
+              name="add-circle-outline"
+              size={18}
+              color={COLORS.PRIMARY}
+            />
+            <Text style={styles.adminBtnText}>Home Goal</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.adminBtn}
+            onPress={() => openPicker("away")}
+            disabled={creatingEvent}
+          >
+            <Ionicons
+              name="add-circle-outline"
+              size={18}
+              color={COLORS.PRIMARY}
+            />
+            <Text style={styles.adminBtnText}>Away Goal</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.adminRow}>
+          <TouchableOpacity
+            style={styles.adminBtnGhost}
+            onPress={onUndo}
+            disabled={undoing}
+          >
+            <Ionicons name="arrow-undo" size={18} color={COLORS.PRIMARY} />
+            <Text style={styles.adminBtnGhostText}>Undo Last</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.adminBtnGhost}
+            onPress={onStartNextChukker}
+            disabled={updatingStatus}
+          >
+            <Ionicons name="play" size={18} color={COLORS.PRIMARY} />
+            <Text style={styles.adminBtnGhostText}>
+              {match.current_chukker
+                ? `Next Chukker (${(match.current_chukker || 0) + 1})`
+                : "Start Match"}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.adminBtnDanger}
+            onPress={onEndMatch}
+            disabled={updatingStatus}
+          >
+            <Ionicons name="stop" size={18} color="#fff" />
+            <Text style={styles.adminBtnDangerText}>End Match</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Player Picker Modal */}
+        <SafeModal
+          visible={!!pickerVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setPickerVisible(null)}
+        >
+          <View style={styles.modalBackdrop}>
+            <View style={styles.modalCard}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>
+                  Select Scorer ({pickerVisible?.teamLabel})
+                </Text>
+                <TouchableOpacity onPress={() => setPickerVisible(null)}>
+                  <Ionicons name="close" size={22} color="#333" />
+                </TouchableOpacity>
+              </View>
+              <FlatList
+                data={pickerList}
+                keyExtractor={(lu) => `${lu.team_id}-${lu.player_id}`}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.selectItem}
+                    onPress={async () => {
+                      const isHome =
+                        (pickerVisible?.teamLabel || "") ===
+                        (match.home_team?.name || "Home");
+                      await onAddGoal(isHome ? "home" : "away", item.player_id);
+                      setPickerVisible(null);
+                    }}
+                  >
+                    <Text style={styles.selectItemText}>
+                      {item.player?.name || "Player"}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                ListHeaderComponent={() => (
+                  <TouchableOpacity
+                    style={[styles.selectItem, { backgroundColor: "#fafafa" }]}
+                    onPress={async () => {
+                      const isHome =
+                        (pickerVisible?.teamLabel || "") ===
+                        (match.home_team?.name || "Home");
+                      await onAddGoal(isHome ? "home" : "away");
+                      setPickerVisible(null);
+                    }}
+                  >
+                    <Text
+                      style={[styles.selectItemText, { fontWeight: "700" }]}
+                    >
+                      No Player
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          </View>
+        </SafeModal>
+      </View>
+    );
   };
 
   const renderHeader = () => {
@@ -219,6 +436,12 @@ export default function MatchDetailScreen() {
   ) => {
     const byTeam = groupLineups(match.match_lineups);
     const list = teamId ? byTeam[teamId] || [] : [];
+
+    // Debug log to check lineup data
+    if (list.length > 0 && !list[0].player) {
+      console.log("Warning: Lineup missing player data:", list[0]);
+    }
+
     return (
       <View style={styles.lineupColumn}>
         {list.length === 0 ? (
@@ -237,7 +460,7 @@ export default function MatchDetailScreen() {
                 <View style={styles.lineupInfo}>
                   <View style={styles.playerNameRow}>
                     <Text style={styles.playerNameSm} numberOfLines={1}>
-                      {lu.player?.name || "Player"}
+                      {lu.player?.name || `Player ID: ${lu.player_id}`}
                     </Text>
                     {goalCount > 0 && (
                       <View style={styles.goalBadge}>
@@ -296,6 +519,7 @@ export default function MatchDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         {renderHeader()}
+        {renderAdminControls()}
       </ScrollView>
     </SafeAreaView>
   );
@@ -542,5 +766,87 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#999",
     marginTop: 8,
+  },
+  adminRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    marginTop: 6,
+  },
+  adminBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: `${COLORS.PRIMARY}15`,
+    borderRadius: 12,
+    paddingVertical: 10,
+  },
+  adminBtnText: {
+    marginLeft: 6,
+    color: COLORS.PRIMARY,
+    fontWeight: "700",
+  },
+  adminBtnGhost: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 12,
+    paddingVertical: 10,
+  },
+  adminBtnGhostText: {
+    marginLeft: 6,
+    color: COLORS.PRIMARY,
+    fontWeight: "700",
+  },
+  adminBtnDanger: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#d32f2f",
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginLeft: 8,
+  },
+  adminBtnDangerText: {
+    marginLeft: 6,
+    color: "#fff",
+    fontWeight: "700",
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "flex-end",
+  },
+  modalCard: {
+    maxHeight: "70%",
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 12,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#333",
+  },
+  selectItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  selectItemText: {
+    color: "#333",
   },
 });

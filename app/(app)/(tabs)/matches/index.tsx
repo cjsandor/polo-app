@@ -30,6 +30,7 @@ import {
 // Types & Constants
 import type { Match } from "../../../../src/types/database";
 import { COLORS } from "../../../../src/config/constants";
+import { useIsAdmin, useIsAuthenticated } from "../../../../src/store/hooks";
 
 type TabType = "upcoming" | "live" | "completed";
 
@@ -42,6 +43,8 @@ const TABS: { key: TabType; label: string; icon: string }[] = [
 export default function MatchesScreen() {
   const [activeTab, setActiveTab] = useState<TabType>("upcoming");
   const router = useRouter();
+  const isAdmin = useIsAdmin();
+  const isAuthenticated = useIsAuthenticated();
 
   // API Queries
   const {
@@ -93,7 +96,7 @@ export default function MatchesScreen() {
 
   const handleMatchPress = useCallback(
     (match: Match) => {
-      router.push(`/matches/${match.id}`);
+      router.push(`/(app)/(tabs)/matches/${match.id}`);
     },
     [router]
   );
@@ -180,9 +183,32 @@ export default function MatchesScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Matches</Text>
-        <TouchableOpacity style={styles.headerButton}>
-          <Ionicons name="search" size={24} color={COLORS.PRIMARY} />
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          {isAdmin && (
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => router.push("/(app)/(tabs)/matches/create")}
+            >
+              <Ionicons name="add" size={24} color={COLORS.PRIMARY} />
+            </TouchableOpacity>
+          )}
+          {!isAuthenticated && (
+            <TouchableOpacity
+              style={[
+                styles.headerButton,
+                isAdmin && styles.headerButtonSpacer,
+              ]}
+              onPress={() => router.push("/(auth)/sign-in")}
+              accessibilityLabel="Log in"
+            >
+              <Ionicons
+                name="log-in-outline"
+                size={24}
+                color={COLORS.PRIMARY}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* Tabs */}
@@ -242,6 +268,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
     alignItems: "center",
     justifyContent: "center",
+  },
+  headerButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  headerButtonSpacer: {
+    marginLeft: 8,
   },
   tabsContainer: {
     flexDirection: "row",

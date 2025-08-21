@@ -1,6 +1,6 @@
 /**
- * Supabase Base Query for RTK Query
- * Custom base query that integrates Supabase with RTK Query
+ * Supabase Base Query for RTK Query - Debug Version
+ * Custom base query that integrates Supabase with RTK Query with added debugging
  */
 
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
@@ -22,22 +22,28 @@ export interface SupabaseQueryArgs {
 
 export interface SupabaseQueryResult<T = unknown> {
     data?: T;
-    error?: {
-        message: string;
-        details?: string;
-        hint?: string;
-        code?: string;
-    };
-    count?: number;
+    count?: number | null;
+    status?: number;
+    statusText?: string;
+}
+
+export interface SupabaseQueryError {
+    message: string;
     status?: number;
 }
 
-// Create the base query function
+// Create the base query function with debugging
 export const supabaseBaseQuery: BaseQueryFn<
     SupabaseQueryArgs,
     unknown,
     { message: string; status?: number }
 > = async (args) => {
+    console.log("🔍 Base Query Called:", {
+        table: args.table,
+        method: args.method,
+        rpcName: args.rpcName,
+    });
+
     try {
         const {
             table,
@@ -59,6 +65,7 @@ export const supabaseBaseQuery: BaseQueryFn<
                 if (!table) {
                     throw new Error("Table is required for select queries");
                 }
+                console.log(`📊 Selecting from table: ${table}`);
                 queryBuilder = supabase.from(table).select("*", { count });
 
                 if (query) {
@@ -66,6 +73,13 @@ export const supabaseBaseQuery: BaseQueryFn<
                 }
 
                 result = await queryBuilder;
+                console.log(`✅ Select result:`, {
+                    hasData: !!result.data,
+                    dataLength: Array.isArray(result.data)
+                        ? result.data.length
+                        : "not array",
+                    error: result.error,
+                });
                 break;
 
             case "insert":
@@ -99,7 +113,9 @@ export const supabaseBaseQuery: BaseQueryFn<
                 break;
 
             case "delete":
-                if (!table) throw new Error("Table is required for delete");
+                if (!table) {
+                    throw new Error("Table is required for delete queries");
+                }
                 queryBuilder = supabase.from(table).delete();
 
                 if (query) {
@@ -130,7 +146,12 @@ export const supabaseBaseQuery: BaseQueryFn<
                 if (!rpcName) {
                     throw new Error("RPC name is required for RPC calls");
                 }
+                console.log(`🔧 Calling RPC: ${rpcName}`);
                 result = await supabase.rpc(rpcName, rpcParams || {});
+                console.log(`✅ RPC result:`, {
+                    hasData: !!result.data,
+                    error: result.error,
+                });
                 break;
 
             default:
@@ -139,7 +160,7 @@ export const supabaseBaseQuery: BaseQueryFn<
 
         // Handle Supabase errors
         if (result.error) {
-            console.error("Supabase query error:", result.error);
+            console.error("❌ Supabase query error:", result.error);
 
             // Parse common errors
             const errorMessage = AuthErrors.parseAuthError(result.error);
@@ -153,25 +174,8 @@ export const supabaseBaseQuery: BaseQueryFn<
             };
         }
 
-        // Debug log for match queries with lineups
-        if (
-            table === "matches" && result.data && typeof window !== "undefined"
-        ) {
-            const matchData = Array.isArray(result.data)
-                ? result.data[0]
-                : result.data;
-            if (matchData?.match_lineups?.length > 0) {
-                console.log("[BaseQuery] Match lineups data:", {
-                    has_lineups: true,
-                    lineup_count: matchData.match_lineups.length,
-                    first_lineup_has_player: !!matchData.match_lineups[0]
-                        .player,
-                    sample_lineup: matchData.match_lineups[0],
-                });
-            }
-        }
-
         // Return successful result
+        console.log("✅ Query successful, returning data");
         return {
             data: {
                 data: result.data,
@@ -180,7 +184,7 @@ export const supabaseBaseQuery: BaseQueryFn<
             } as SupabaseQueryResult,
         };
     } catch (error) {
-        console.error("Base query error:", error);
+        console.error("❌ Base query error:", error);
 
         // Handle network and other errors
         const message = error instanceof Error
@@ -202,65 +206,26 @@ export const supabaseBaseQuery: BaseQueryFn<
 function getStatusCodeFromError(error: any): number {
     if (!error) return 500;
 
-    // Map common Supabase error codes to HTTP status codes
-    switch (error.code) {
-        case "PGRST116": // Not found
-            return 404;
-        case "23505": // Unique violation
-            return 409;
-        case "23503": // Foreign key violation
-            return 400;
-        case "23502": // Not null violation
-            return 400;
-        case "42501": // Insufficient privilege (RLS)
-            return 403;
-        case "08006": // Connection failure
-        case "08000": // Connection exception
-            return 503;
-        case "57014": // Query canceled
-            return 408;
-        default:
-            return 500;
-    }
+    // Check for common error codes
+    if (error.code === "PGRST301") return 404; // Not found
+    if (error.code === "PGRST202") return 409; // Conflict
+    if (error.code === "PGRST203") return 409; // Duplicate
+    if (error.code === "PGRST204") return 400; // Bad request
+    if (error.code === "23505") return 409; // Unique violation
+    if (error.code === "23503") return 400; // Foreign key violation
+    if (error.code === "42501") return 403; // Insufficient privilege
+    if (error.code === "42P01") return 404; // Undefined table
+    if (error.code === "42703") return 400; // Undefined column
+
+    // Check for auth errors
+    if (error.message?.includes("JWT")) return 401;
+    if (error.message?.includes("unauthorized")) return 401;
+    if (error.message?.includes("forbidden")) return 403;
+
+    // Check HTTP status
+    if (error.status) return error.status;
+    if (error.statusCode) return error.statusCode;
+
+    // Default to 500
+    return 500;
 }
-
-// Utility function to create optimistic updates
-export const createOptimisticUpdate = <T>(
-    endpoint: string,
-    args: any,
-    updateData: T,
-) => {
-    return {
-        type: `${endpoint}/queryFulfilled`,
-        meta: {
-            arg: args,
-            requestId: Date.now().toString(),
-            requestStatus: "fulfilled",
-        },
-        payload: updateData,
-    };
-};
-
-// Retry configuration for failed queries
-export const retryCondition = (error: any, args: any, extraOptions: any) => {
-    // Don't retry on 4xx errors (client errors)
-    if (error.status && error.status >= 400 && error.status < 500) {
-        return false;
-    }
-
-    // Retry on network errors and 5xx errors
-    return error.status === 0 || (error.status >= 500 && error.status < 600);
-};
-
-// Default retry delay with exponential backoff
-export const retryDelay = (
-    attempt: number,
-    error: any,
-    baseDelay = API.RETRY_DELAY_MS,
-) => {
-    // Exponential backoff: baseDelay * (2 ^ attempt) + random jitter
-    const exponentialDelay = baseDelay * Math.pow(2, attempt);
-    const jitter = Math.random() * 1000; // Random jitter up to 1 second
-
-    return Math.min(exponentialDelay + jitter, 30000); // Cap at 30 seconds
-};

@@ -69,12 +69,18 @@ export const auth = {
     /**
      * Sign up with email and password
      */
-    signUp: async (email: string, password: string, metadata?: any) => {
+    signUp: async (
+        email: string,
+        password: string,
+        metadata?: any,
+        emailRedirectTo?: string,
+    ) => {
         return await supabase.auth.signUp({
             email,
             password,
             options: {
                 data: metadata,
+                ...(emailRedirectTo ? { emailRedirectTo } : {}),
             },
         });
     },

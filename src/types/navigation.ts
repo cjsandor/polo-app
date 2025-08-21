@@ -14,7 +14,6 @@ export type AppTabsParamList = {
     "matches": undefined;
     "teams": undefined;
     "players": undefined;
-    "profile": undefined;
 };
 
 export type MatchesStackParamList = {
@@ -36,14 +35,6 @@ export type PlayersStackParamList = {
     "[id]": { id: string };
     "create": undefined;
     "edit": { id: string };
-};
-
-export type ProfileStackParamList = {
-    "index": undefined;
-    "settings": undefined;
-    "edit": undefined;
-    "followed-teams": undefined;
-    "notifications": undefined;
 };
 
 export type AdminStackParamList = {

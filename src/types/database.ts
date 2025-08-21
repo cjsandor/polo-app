@@ -301,25 +301,6 @@ export interface CreateFieldData {
 
 export interface UpdateFieldData extends Partial<CreateFieldData> {}
 
-// Additional enhanced types for API responses
-export interface MatchWithDetails extends Match {
-    home_team: Team;
-    away_team: Team;
-    field?: Field;
-    tournament?: Tournament;
-    match_lineups: MatchLineup[];
-    match_events: MatchEvent[];
-}
-
-export interface TeamWithDetails extends Team {
-    home_field?: Field;
-    players: Player[];
-}
-
-export interface PlayerWithDetails extends Player {
-    team?: Team;
-}
-
 export interface TournamentWithDetails extends Tournament {
     matches: Array<
         Match & {
@@ -336,7 +317,7 @@ export interface CreateMatchEventData {
     team_id?: string;
     player_id?: string;
     occurred_at?: string;
-    details?: Record<string, any>;
+    details?: any;
 }
 
 // Database type for Supabase client

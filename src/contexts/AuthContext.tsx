@@ -130,36 +130,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     getInitialSession();
 
     // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event);
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log("Auth state changed:", event);
 
-      setSession(session);
-      setUser(session?.user ?? null);
+        setSession(session);
+        setUser(session?.user ?? null);
 
-      if (session?.user) {
-        // Fetch profile and admin status
-        const [profileData, adminStatus] = await Promise.all([
-          fetchProfile(session.user.id),
-          checkAdminStatus(session.user.id),
-        ]);
+        if (session?.user) {
+          // Fetch profile and admin status
+          const [profileData, adminStatus] = await Promise.all([
+            fetchProfile(session.user.id),
+            checkAdminStatus(session.user.id),
+          ]);
 
-        setProfile(profileData);
-        setIsAdmin(adminStatus);
-      } else {
-        // Clear profile and admin status on sign out
-        setProfile(null);
-        setIsAdmin(false);
+          setProfile(profileData);
+          setIsAdmin(adminStatus);
+        } else {
+          // Clear profile and admin status on sign out
+          setProfile(null);
+          setIsAdmin(false);
+        }
+
+        setLoading(false);
       }
-
-      setLoading(false);
-    });
+    );
 
     return () => {
-      subscription.unsubscribe();
+      authListener.subscription?.unsubscribe?.();
     };
-  }, [user?.user_metadata, user?.email]);
+  }, []);
 
   // Auth methods
   const signIn = async (email: string, password: string) => {

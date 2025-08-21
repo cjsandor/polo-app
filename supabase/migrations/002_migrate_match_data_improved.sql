@@ -175,3 +175,4 @@ COMMIT; -- End transaction
 -- LEFT JOIN public.tournaments t ON t.id = m.tournament_id
 -- LEFT JOIN public.fields f ON f.id = m.field_id
 -- WHERE m.scheduled_time = '2025-08-05 17:00:00'::timestamptz;
+

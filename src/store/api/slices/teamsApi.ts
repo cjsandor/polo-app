@@ -20,7 +20,9 @@ export const teamsApi = api.injectEndpoints({
                 table: "teams",
                 query: (builder) =>
                     builder
-                        .select("*, home_field:fields(*), players!players_team_id_fkey(*)")
+                        .select(
+                            "*, home_field:fields(*), players!players_team_id_fkey(*)",
+                        )
                         .order("name", { ascending: true }),
             }),
             providesTags: ["Team"],
@@ -34,7 +36,9 @@ export const teamsApi = api.injectEndpoints({
                 table: "teams",
                 query: (builder) =>
                     builder
-                        .select("*, home_field:fields(*), players!players_team_id_fkey(*)")
+                        .select(
+                            "*, home_field:fields(*), players!players_team_id_fkey(*)",
+                        )
                         .eq("id", id)
                         .single(),
             }),
@@ -49,7 +53,9 @@ export const teamsApi = api.injectEndpoints({
                 table: "teams",
                 query: (builder) =>
                     builder
-                        .select("*, home_field:fields(*), players!players_team_id_fkey(*)")
+                        .select(
+                            "*, home_field:fields(*), players!players_team_id_fkey(*)",
+                        )
                         .ilike("name", `%${searchTerm}%`)
                         .order("name", { ascending: true }),
             }),
@@ -70,7 +76,9 @@ export const teamsApi = api.injectEndpoints({
                 table: "teams",
                 query: (builder) =>
                     builder
-                        .select("*, home_field:fields(*), players!players_team_id_fkey(count)")
+                        .select(
+                            "*, home_field:fields(*), players!players_team_id_fkey(count)",
+                        )
                         .order("name", { ascending: true }),
             }),
             providesTags: ["Team", "Player"],

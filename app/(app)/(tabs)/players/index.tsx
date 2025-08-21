@@ -70,7 +70,7 @@ export default function PlayersScreen() {
 
   const handlePlayerPress = useCallback(
     (player: Player) => {
-      router.push(`/players/${player.id}`);
+      router.push(`/(app)/(tabs)/players/${player.id}`);
     },
     [router]
   );

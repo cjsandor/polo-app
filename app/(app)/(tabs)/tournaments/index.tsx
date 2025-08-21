@@ -1,6 +1,6 @@
-﻿/**
- * Teams Screen
- * Displays teams with search and follow functionality
+/**
+ * Tournaments Screen
+ * Displays tournaments with search functionality
  */
 
 import React, { useState, useCallback } from "react";
@@ -21,27 +21,27 @@ import { useRouter } from "expo-router";
 import { LoadingSpinner } from "../../../../src/components/ui/LoadingSpinner";
 
 // API Hooks
-import { useGetTeamsQuery } from "../../../../src/store/api/slices/teamsApi";
+import { useGetTournamentsQuery } from "../../../../src/store/api/slices/tournamentsApi";
 
 // Types & Constants
-import type { Team } from "../../../../src/types/database";
+import type { Tournament } from "../../../../src/types/database";
 import { COLORS, UI } from "../../../../src/config/constants";
 
-export default function TeamsScreen() {
+export default function TournamentsScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
 
   // API Query
-  const { data: teams, isLoading, refetch } = useGetTeamsQuery();
+  const { data: tournaments, isLoading, refetch } = useGetTournamentsQuery();
 
-  const filteredTeams = teams?.filter((team) =>
-    team.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredTournaments = tournaments?.filter((tournament) =>
+    tournament.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleTeamPress = useCallback(
-    (team: Team) => {
-      router.push(`/(app)/(tabs)/teams/${team.id}`);
+  const handleTournamentPress = useCallback(
+    (tournament: Tournament) => {
+      router.push(`/(app)/(tabs)/tournaments/${tournament.id}`);
     },
     [router]
   );
@@ -52,20 +52,95 @@ export default function TeamsScreen() {
     setRefreshing(false);
   }, [refetch]);
 
-  const renderTeamCard = ({ item }: { item: Team }) => {
+  const formatDateRange = (startDate: string, endDate: string) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const options: Intl.DateTimeFormatOptions = {
+      month: "short",
+      day: "numeric",
+    };
+
+    if (start.getFullYear() !== end.getFullYear()) {
+      return `${start.toLocaleDateString("en-US", { ...options, year: "numeric" })} - ${end.toLocaleDateString("en-US", { ...options, year: "numeric" })}`;
+    } else if (start.getMonth() !== end.getMonth()) {
+      return `${start.toLocaleDateString("en-US", options)} - ${end.toLocaleDateString("en-US", { ...options, year: "numeric" })}`;
+    } else {
+      return `${start.toLocaleDateString("en-US", options)} - ${end.getDate()}, ${end.getFullYear()}`;
+    }
+  };
+
+  const getTournamentStatus = (startDate: string, endDate: string) => {
+    const now = new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (now < start) {
+      return { text: "Upcoming", color: "#4CAF50" };
+    } else if (now > end) {
+      return { text: "Completed", color: "#757575" };
+    } else {
+      return { text: "Live", color: "#FF5722" };
+    }
+  };
+
+  const renderTournamentCard = ({ item }: { item: Tournament }) => {
+    const status = getTournamentStatus(item.start_date, item.end_date);
+
     return (
-      <TeamCard
-        team={item}
-        onPress={() => handleTeamPress(item)}
-      />
+      <TouchableOpacity
+        style={styles.tournamentCard}
+        onPress={() => handleTournamentPress(item)}
+      >
+        <View style={styles.tournamentInfo}>
+          {/* Tournament Icon */}
+          <View style={styles.tournamentLogo}>
+            <Ionicons name="trophy" size={32} color={COLORS.PRIMARY} />
+          </View>
+
+          {/* Tournament Details */}
+          <View style={styles.tournamentDetails}>
+            <Text style={styles.tournamentName}>{item.name}</Text>
+
+            <View style={styles.detailRow}>
+              <Ionicons name="calendar-outline" size={16} color="#666" />
+              <Text style={styles.detailText}>
+                {formatDateRange(item.start_date, item.end_date)}
+              </Text>
+            </View>
+
+            {item.location && (
+              <View style={styles.detailRow}>
+                <Ionicons name="location-outline" size={16} color="#666" />
+                <Text style={styles.detailText}>{item.location}</Text>
+              </View>
+            )}
+
+            <View style={styles.statusBadge}>
+              <View
+                style={[styles.statusDot, { backgroundColor: status.color }]}
+              />
+              <Text style={[styles.statusText, { color: status.color }]}>
+                {status.text}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Action Icon */}
+        <View style={styles.tournamentActions}>
+          <Ionicons name="chevron-forward" size={20} color="#ccc" />
+        </View>
+      </TouchableOpacity>
     );
   };
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Ionicons name="people-outline" size={64} color="#ccc" />
+      <Ionicons name="trophy-outline" size={64} color="#ccc" />
       <Text style={styles.emptyText}>
-        {searchQuery ? "No teams match your search" : "No teams found"}
+        {searchQuery
+          ? "No tournaments match your search"
+          : "No tournaments found"}
       </Text>
       <TouchableOpacity style={styles.refreshButton} onPress={handleRefresh}>
         <Ionicons name="refresh" size={20} color={COLORS.PRIMARY} />
@@ -78,7 +153,7 @@ export default function TeamsScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Teams</Text>
+        <Text style={styles.headerTitle}>Tournaments</Text>
       </View>
 
       {/* Search Bar */}
@@ -87,7 +162,7 @@ export default function TeamsScreen() {
           <Ionicons name="search" size={20} color="#999" />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search teams..."
+            placeholder="Search tournaments..."
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholderTextColor="#999"
@@ -102,12 +177,12 @@ export default function TeamsScreen() {
 
       {/* Content */}
       <View style={styles.content}>
-        {isLoading && !teams ? (
-          <LoadingSpinner text="Loading teams..." />
+        {isLoading && !tournaments ? (
+          <LoadingSpinner text="Loading tournaments..." />
         ) : (
           <FlatList
-            data={filteredTeams || []}
-            renderItem={renderTeamCard}
+            data={filteredTournaments || []}
+            renderItem={renderTournamentCard}
             keyExtractor={(item) => item.id}
             refreshControl={
               <RefreshControl
@@ -127,43 +202,9 @@ export default function TeamsScreen() {
   );
 }
 
-// Team Card Component
-const TeamCard: React.FC<{
-  team: Team;
-  onPress: () => void;
-}> = ({ team, onPress }) => {
-  return (
-    <TouchableOpacity style={styles.teamCard} onPress={onPress}>
-      <View style={styles.teamInfo}>
-        {/* Team Logo */}
-        <View style={styles.teamLogo}>
-          <Ionicons name="shield" size={32} color={COLORS.PRIMARY} />
-        </View>
-
-        {/* Team Details */}
-        <View style={styles.teamDetails}>
-          <Text style={styles.teamName}>{team.name}</Text>
-          {team.home_field?.name && (
-            <View style={styles.detailRow}>
-              <Ionicons name="location-outline" size={16} color="#666" />
-              <Text style={styles.detailText}>{team.home_field.name}</Text>
-            </View>
-          )}
-          <View style={styles.detailRow}>
-            <Ionicons name="people-outline" size={16} color="#666" />
-            <Text style={styles.detailText}>
-              {team.players?.length || 0} Players
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Actions */}
-      <View style={styles.teamActions}>
-        <Ionicons name="chevron-forward" size={20} color="#ccc" />
-      </View>
-    </TouchableOpacity>
-  );
+export const options = {
+  title: "Tournaments",
+  tabBarLabel: "Tournaments",
 };
 
 const styles = StyleSheet.create({
@@ -213,7 +254,7 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: 16,
   },
-  teamCard: {
+  tournamentCard: {
     backgroundColor: "#fff",
     borderRadius: 12,
     marginHorizontal: 16,
@@ -229,12 +270,12 @@ const styles = StyleSheet.create({
     // Shadow for Android
     elevation: 3,
   },
-  teamInfo: {
+  tournamentInfo: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
   },
-  teamLogo: {
+  tournamentLogo: {
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -243,10 +284,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 16,
   },
-  teamDetails: {
+  tournamentDetails: {
     flex: 1,
   },
-  teamName: {
+  tournamentName: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
@@ -262,18 +303,24 @@ const styles = StyleSheet.create({
     color: "#666",
     marginLeft: 6,
   },
-  teamActions: {
+  statusBadge: {
     flexDirection: "row",
     alignItems: "center",
+    marginTop: 4,
   },
-  followButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: `${COLORS.PRIMARY}15`,
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  tournamentActions: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
   },
   emptyState: {
     flex: 1,

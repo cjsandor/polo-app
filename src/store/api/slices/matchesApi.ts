@@ -174,6 +174,45 @@ export const matchesApi = api.injectEndpoints({
             transformResponse: (response: any) => response.data?.[0],
         }),
 
+        // Create match lineups (bulk insert)
+        createMatchLineups: builder.mutation<
+            void,
+            {
+                rows: Array<{
+                    match_id: string;
+                    team_id: string;
+                    player_id: string;
+                    position?: number;
+                    starter?: boolean;
+                }>;
+            }
+        >({
+            query: ({ rows }) => ({
+                method: "insert",
+                table: "match_lineups",
+                data: rows,
+                returning: "minimal",
+            }),
+            invalidatesTags: (result, error, { rows }) => [
+                ...(rows?.length
+                    ? ([{ type: "Match", id: rows[0].match_id }] as const)
+                    : ([] as const)),
+                "Match",
+            ],
+        }),
+
+        // Delete match lineups for a match
+        deleteMatchLineups: builder.mutation<void, string>({
+            query: (matchId) => ({
+                method: "delete",
+                table: "match_lineups",
+                query: (builder) => builder.eq("match_id", matchId),
+            }),
+            invalidatesTags: (result, error, matchId) => [
+                { type: "Match", id: matchId },
+            ],
+        }),
+
         // Update match
         updateMatch: builder.mutation<
             Match,
@@ -314,6 +353,8 @@ export const {
     useGetMatchesForTeamQuery,
     useGetUpcomingMatchesQuery,
     useCreateMatchMutation,
+    useCreateMatchLineupsMutation,
+    useDeleteMatchLineupsMutation,
     useUpdateMatchMutation,
     useDeleteMatchMutation,
     useUpdateMatchScoreMutation,

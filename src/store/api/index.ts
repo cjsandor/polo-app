@@ -4,7 +4,8 @@
  */
 
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { supabaseBaseQuery } from "./baseQuery";
+// Temporarily using debug version to identify issues
+import { supabaseBaseQuery } from "./baseQuery-debug";
 import { CACHE } from "../../config/constants";
 
 // Define tag types for cache invalidation

@@ -17,12 +17,13 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
-import { LoadingSpinner } from "../../../src/components/ui/LoadingSpinner";
-import { COLORS, POLO } from "../../../src/config/constants";
+import { LoadingSpinner } from "../../../../src/components/ui/LoadingSpinner";
+import { COLORS, POLO } from "../../../../src/config/constants";
 import {
   useGetPlayerByIdQuery,
   useGetPlayerStatsQuery,
-} from "../../../src/store/api/slices/playersApi";
+  useGetPlayerRecentMatchesQuery,
+} from "../../../../src/store/api/slices/playersApi";
 
 export default function PlayerDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -38,8 +39,16 @@ export default function PlayerDetailScreen() {
     isLoading: statsLoading,
     refetch: refetchStats,
   } = useGetPlayerStatsQuery(id as string, { skip: !id });
+  const {
+    data: recentMatches,
+    isLoading: matchesLoading,
+    refetch: refetchMatches,
+  } = useGetPlayerRecentMatchesQuery(
+    { playerId: id as string, limit: 5 },
+    { skip: !id }
+  );
 
-  const isLoading = playerLoading || statsLoading;
+  const isLoading = playerLoading || statsLoading || matchesLoading;
 
   if (isLoading && !player) {
     return <LoadingSpinner text="Loading player..." />;
@@ -55,6 +64,7 @@ export default function PlayerDetailScreen() {
           onPress={() => {
             refetch();
             refetchStats();
+            refetchMatches();
           }}
         >
           <Ionicons name="refresh" size={16} color={COLORS.PRIMARY} />
@@ -102,7 +112,7 @@ export default function PlayerDetailScreen() {
       {player.team && (
         <TouchableOpacity
           style={styles.teamLink}
-          onPress={() => router.push(`/teams/${player.team?.id}`)}
+          onPress={() => router.push(`/(app)/(tabs)/teams/${player.team?.id}`)}
         >
           <Ionicons name="shield-outline" size={18} color={COLORS.PRIMARY} />
           <Text style={styles.teamLinkText}>{player.team.name}</Text>
@@ -120,12 +130,56 @@ export default function PlayerDetailScreen() {
         </View>
       </View>
 
-      {/* Placeholder for recent matches or gallery */}
+      {/* Recent Matches */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Recent Matches</Text>
-        <View style={styles.emptyBox}>
-          <Text style={styles.emptySubtext}>Coming soon</Text>
-        </View>
+        {recentMatches && recentMatches.length > 0 ? (
+          recentMatches.map((match) => (
+            <TouchableOpacity
+              key={match.match_id}
+              style={styles.matchCard}
+              onPress={() => router.push(`/(app)/(tabs)/matches/${match.match_id}`)}
+            >
+              <View style={styles.matchHeader}>
+                <Text style={styles.matchTeams}>
+                  {match.home_team_name} vs {match.away_team_name}
+                </Text>
+                {match.status === "completed" && (
+                  <View style={[
+                    styles.resultBadge,
+                    match.is_winner ? styles.winBadge : styles.lossBadge
+                  ]}>
+                    <Text style={styles.resultText}>
+                      {match.is_winner ? "W" : "L"}
+                    </Text>
+                  </View>
+                )}
+              </View>
+              <View style={styles.matchInfo}>
+                <Text style={styles.matchScore}>
+                  {match.home_score} - {match.away_score}
+                </Text>
+                {match.player_goals > 0 && (
+                  <Text style={styles.playerGoals}>
+                    {match.player_goals} {match.player_goals === 1 ? "goal" : "goals"}
+                  </Text>
+                )}
+              </View>
+              <View style={styles.matchMeta}>
+                {match.tournament_name && (
+                  <Text style={styles.matchMetaText}>{match.tournament_name}</Text>
+                )}
+                <Text style={styles.matchDate}>
+                  {new Date(match.scheduled_time).toLocaleDateString()}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptySubtext}>No recent matches</Text>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -147,6 +201,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f9fa",
     paddingHorizontal: 16,
     paddingTop: 12,
+    paddingBottom: 20,
   },
   headerCard: {
     backgroundColor: "#fff",
@@ -271,5 +326,71 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700",
     marginLeft: 6,
+  },
+  matchCard: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#eee",
+  },
+  matchHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  matchTeams: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#333",
+    flex: 1,
+  },
+  matchInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  matchScore: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#333",
+  },
+  playerGoals: {
+    fontSize: 13,
+    color: COLORS.PRIMARY,
+    fontWeight: "700",
+    marginLeft: 12,
+  },
+  matchMeta: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  matchMetaText: {
+    fontSize: 11,
+    color: "#888",
+    flex: 1,
+  },
+  matchDate: {
+    fontSize: 11,
+    color: "#888",
+  },
+  resultBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  winBadge: {
+    backgroundColor: "#d4edda",
+  },
+  lossBadge: {
+    backgroundColor: "#f8d7da",
+  },
+  resultText: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#333",
   },
 });

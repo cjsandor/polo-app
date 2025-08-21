@@ -34,15 +34,14 @@ export default function AdminLayout() {
         name="index"
         options={{
           title: "Admin Dashboard",
-          headerShown: true,
-          presentation: "modal",
+          headerShown: false,
         }}
       />
       <Stack.Screen
         name="matches"
         options={{
           title: "Manage Matches",
-          headerShown: true,
+          headerShown: false,
           headerBackTitle: "Admin",
         }}
       />
@@ -50,7 +49,7 @@ export default function AdminLayout() {
         name="tournaments"
         options={{
           title: "Manage Tournaments",
-          headerShown: true,
+          headerShown: false,
           headerBackTitle: "Admin",
         }}
       />
@@ -58,15 +57,15 @@ export default function AdminLayout() {
         name="fields"
         options={{
           title: "Manage Fields",
-          headerShown: true,
+          headerShown: false,
           headerBackTitle: "Admin",
         }}
       />
       <Stack.Screen
-        name="users"
+        name="players"
         options={{
-          title: "Manage Users",
-          headerShown: true,
+          title: "Manage Players",
+          headerShown: false,
           headerBackTitle: "Admin",
         }}
       />

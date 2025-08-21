@@ -317,7 +317,45 @@ export const playersApi = api.injectEndpoints({
             providesTags: (result, error, playerId) => [
                 { type: "Player", id: `stats-${playerId}` },
             ],
-            transformResponse: (response: any) => response.data,
+            transformResponse: (response: any) => response.data?.[0] || {
+                total_matches: 0,
+                goals: 0,
+                assists: 0,
+                average_handicap: 0,
+                wins: 0,
+                losses: 0,
+            },
+        }),
+
+        // Get player recent matches
+        getPlayerRecentMatches: builder.query<
+            Array<{
+                match_id: string;
+                tournament_name: string | null;
+                scheduled_time: string;
+                status: string;
+                home_team_id: string;
+                home_team_name: string;
+                away_team_id: string;
+                away_team_name: string;
+                home_score: number;
+                away_score: number;
+                player_team_id: string;
+                player_goals: number;
+                field_name: string | null;
+                is_winner: boolean;
+            }>,
+            { playerId: string; limit?: number }
+        >({
+            query: ({ playerId, limit = 5 }) => ({
+                method: "rpc",
+                rpcName: "get_player_recent_matches",
+                rpcParams: { p_player_id: playerId, p_limit: limit },
+            }),
+            providesTags: (result, error, { playerId }) => [
+                { type: "Player", id: `recent-${playerId}` },
+            ],
+            transformResponse: (response: any) => response.data || [],
         }),
     }),
 });
@@ -337,4 +375,5 @@ export const {
     useTransferPlayerMutation,
     useUpdatePlayerHandicapMutation,
     useGetPlayerStatsQuery,
+    useGetPlayerRecentMatchesQuery,
 } = playersApi;

@@ -10,42 +10,32 @@ import { Linking } from "react-native";
 export const navigation = {
     // Go to specific match
     goToMatch: (matchId: string) => {
-        router.push(`/(app)/matches/${matchId}`);
+        router.push(`/(app)/(tabs)/matches/${matchId}`);
     },
 
     // Go to specific team
     goToTeam: (teamId: string) => {
-        router.push(`/(app)/teams/${teamId}`);
+        router.push(`/(app)/(tabs)/teams/${teamId}`);
     },
 
     // Go to specific player
     goToPlayer: (playerId: string) => {
-        router.push(`/(app)/players/${playerId}`);
+        router.push(`/(app)/(tabs)/players/${playerId}`);
     },
 
     // Go to create match (admin only)
     createMatch: () => {
-        router.push("/(app)/matches/create");
+        router.push("/(app)/(tabs)/matches/create");
     },
 
     // Go to edit match (admin only)
     editMatch: (matchId: string) => {
-        router.push(`/(app)/matches/edit?id=${matchId}`);
+        router.push(`/(app)/(tabs)/matches/edit?id=${matchId}`);
     },
 
     // Go to admin dashboard
     goToAdmin: () => {
         router.push("/(app)/(admin)/");
-    },
-
-    // Go to profile settings
-    goToSettings: () => {
-        router.push("/(app)/(tabs)/profile/settings");
-    },
-
-    // Go to followed teams
-    goToFollowedTeams: () => {
-        router.push("/(app)/(tabs)/profile/followed-teams");
     },
 
     // Authentication navigation
@@ -107,15 +97,7 @@ export const linking = {
                                     edit: "players/edit",
                                 },
                             },
-                            "profile": {
-                                screens: {
-                                    index: "profile",
-                                    settings: "profile/settings",
-                                    edit: "profile/edit",
-                                    "followed-teams": "profile/followed-teams",
-                                    notifications: "profile/notifications",
-                                },
-                            },
+                            // Profile screens temporarily removed from tabs
                         },
                     },
                     "(admin)": {
@@ -124,7 +106,7 @@ export const linking = {
                             matches: "admin/matches",
                             tournaments: "admin/tournaments",
                             fields: "admin/fields",
-                            users: "admin/users",
+                            players: "admin/players",
                         },
                     },
                 },
@@ -232,15 +214,14 @@ export const tabNavigation = {
             matches: 0,
             teams: 1,
             players: 2,
-            profile: 3,
-            admin: 4,
+            admin: 3,
         };
         return tabMap[routeName] || 0;
     },
 
     // Get route name from tab index
     getRouteName: (index: number): string => {
-        const routes = ["matches", "teams", "players", "profile", "admin"];
+        const routes = ["matches", "teams", "players", "admin"];
         return routes[index] || "matches";
     },
 };

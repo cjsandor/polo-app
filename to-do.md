@@ -109,30 +109,43 @@ Building a real-time polo match tracking app with Expo SDK 49, TypeScript, and S
 - [x] Implement follow/unfollow functionality
 - [x] Show recent matches for team
 
-### 12. Players Screen ⏳
+### 12. Players Screen ✅
 - [x] Design player card component
 - [x] Implement fuzzy search with debouncing
 - [x] Create player detail with stats
 - [x] Add position and handicap filters
+- [x] Fix player statistics (matches played, goals, recent matches)
 - [ ] Build player photo gallery
+
+### 13. Tournaments Screen ✅
+- [x] Create tournaments list screen with search functionality
+- [x] Build tournament cards showing name, dates, location, and status
+- [x] Implement tournament detail screen with standings
+- [x] Add W-L record display for each team in tournament
+- [x] Show tournament matches overview with MatchCard components
+- [x] Display tournament statistics (teams, matches, goals)
+- [x] Add tournament tab to bottom navigation
 
 ## 📋 Phase 5: Admin Features (Days 16-19)
 
-### 13. Admin Dashboard ⏳
-- [ ] Create admin-only tab/screen
-- [ ] Build match creation form
-- [ ] Implement match editing interface
-- [ ] Add lineup management
+### 14. Admin Dashboard ⏳
+- [x] Create admin-only tab/screen (dashboard with navigation tiles and quick action)
+- [x] Build match creation form (Matches > Add button → Create screen)
+- [x] Add delete buttons with confirmation for item management (tournaments, fields, players)
+- [x] Implement match editing interface (Edit button opens create screen in edit mode with match ID)
+- [x] Add lineup management (Players can be assigned/reassigned when editing matches)
 - [ ] Create tournament management
 
-### 14. Live Scorekeeping ⏳
-- [ ] Design event logging interface
-- [ ] Create quick action buttons for common events
-- [ ] Implement undo/redo functionality
-- [ ] Add chukker management controls
+### 15. Live Scorekeeping ⏳
+- [x] Design event logging interface (admin controls on Match Detail)
+- [x] Create quick action buttons for common events (Home/Away Goal)
+- [x] Implement undo/redo functionality (Undo last event)
+- [x] Add chukker management controls (Start/Next/End)
+- [x] Implement match editing interface (Edit button routes to create screen in edit mode)
+- [x] Add lineup management for match editing (Delete old lineups and create new ones)
 - [ ] Build substitution tracking
 
-### 15. Event Management ⏳
+### 16. Event Management ⏳
 - [ ] Create event type selector
 - [ ] Implement player selector with search
 - [ ] Add event details form (jsonb)
@@ -141,28 +154,28 @@ Building a real-time polo match tracking app with Expo SDK 49, TypeScript, and S
 
 ## 📋 Phase 6: Advanced Features (Days 20-23)
 
-### 16. Offline Support ⏳
+### 17. Offline Support ⏳
 - [ ] Configure RTK Query cache persistence
 - [ ] Implement optimistic updates for events
 - [ ] Add conflict resolution by sequence
 - [ ] Create offline indicator component
 - [ ] Build sync status display
 
-### 17. Push Notifications ⏳
+### 18. Push Notifications ⏳
 - [ ] Request notification permissions
 - [ ] Store Expo push tokens in database
 - [ ] Create notification preferences screen
 - [ ] Implement local notifications for testing
 - [ ] Add notification history
 
-### 18. Supabase Edge Functions ⏳
+### 19. Supabase Edge Functions ⏳
 - [ ] Create match status change trigger
 - [ ] Build goal notification function
 - [ ] Implement team follower notifications
 - [ ] Add match reminder notifications
 - [ ] Create notification batching logic
 
-### 19. Search & Filters ⏳
+### 20. Search & Filters ⏳
 - [ ] Implement global search with tabs
 - [ ] Add date range filters for matches
 - [ ] Create tournament filter
@@ -171,21 +184,21 @@ Building a real-time polo match tracking app with Expo SDK 49, TypeScript, and S
 
 ## 📋 Phase 7: Performance & Polish (Days 24-26)
 
-### 20. Performance Optimization ⏳
+### 21. Performance Optimization ⏳
 - [ ] Implement React.memo for expensive components
 - [ ] Add image caching with expo-image
 - [ ] Optimize re-renders with useMemo/useCallback
 - [ ] Implement lazy loading for tabs
 - [ ] Profile and fix performance bottlenecks
 
-### 21. UI/UX Polish ⏳
+### 22. UI/UX Polish ⏳
 - [ ] Add loading skeletons
 - [ ] Implement error boundaries
 - [ ] Create empty state illustrations
 - [ ] Add pull-to-refresh haptics
 - [ ] Implement smooth animations with Reanimated
 
-### 22. Accessibility ⏳
+### 23. Accessibility ⏳
 - [ ] Add screen reader labels
 - [ ] Implement keyboard navigation
 - [ ] Ensure color contrast compliance
@@ -194,21 +207,21 @@ Building a real-time polo match tracking app with Expo SDK 49, TypeScript, and S
 
 ## 📋 Phase 8: Testing & Deployment (Days 27-30)
 
-### 23. Testing Setup ⏳
+### 24. Testing Setup ⏳
 - [ ] Configure Jest and React Native Testing Library
 - [ ] Write unit tests for utility functions
 - [ ] Test API slices and reducers
 - [ ] Add integration tests for auth flow
 - [ ] Create E2E tests with Detox
 
-### 24. EAS Configuration ⏳
+### 25. EAS Configuration ⏳
 - [ ] Configure EAS Build for iOS/Android
 - [ ] Set up EAS Update for OTA updates
 - [ ] Create build profiles (dev/staging/prod)
 - [ ] Configure app signing
 - [ ] Set up CI/CD with GitHub Actions
 
-### 25. Production Preparation ⏳
+### 26. Production Preparation ⏳
 - [ ] Optimize bundle size
 - [ ] Configure crash reporting (Sentry)
 - [ ] Set up analytics (optional)
@@ -285,13 +298,13 @@ Building a real-time polo match tracking app with Expo SDK 49, TypeScript, and S
 
 ---
 
-**Current Status:** Phase 4 Core UI Screens Completed ✅ - Successfully implemented all main tab screens:
+**Current Status:** Phase 4 Core UI Screens Completed ✅ + Admin Features Enhanced - Successfully implemented all main tab screens including tournaments:
 
 ### ✅ Completed UI Screens
 - **Matches Screen**: Tab layout (Upcoming/Live/Completed) with MatchCard component, pull-to-refresh, live badges, and status indicators
 - **Teams Screen**: Team list with search functionality, team cards showing logos and player count, follow buttons (fixed Supabase ambiguous relationship error)
-- **Players Screen**: Player cards with search and handicap filter, handicap badges, team affiliations 
-- **Profile Screen**: User profile with stats, settings navigation, and sign out functionality
+- **Players Screen**: Player cards with search and handicap filter, handicap badges, team affiliations
+- **Tournaments Screen**: Tournament list with search, cards showing dates/location/status, detail view with standings showing W-L records, matches overview, and tournament statistics
 
 ### ✅ Key UI Components Created
 - `MatchCard` component with team names, scores, status indicators, and live badges
@@ -310,5 +323,54 @@ Building a real-time polo match tracking app with Expo SDK 49, TypeScript, and S
 - **Players Filter Fix**: Updated handicap filter to include 0 handicap players in the "≤ 0" filter option (previously only showed < 0)
 - **Position Filter Removed**: Removed position filter from players screen per user request, keeping only handicap filter
 - **Teams Query Fix**: Fixed teams not loading by specifying exact foreign key relationship `players!players_team_id_fkey` to resolve Supabase ambiguous relationship error
+- **Admin Tab Routing**: Admin tab now opens the Admin Dashboard within tabs so the bottom nav remains visible
+- **API Data Loading Fix**: Identified and documented critical security issue - app was using service_role key instead of anon key for Supabase, causing API failures. Added debug logging to baseQuery to help identify API issues. Created FIX_INSTRUCTIONS.md with detailed steps to resolve the issue.
+- **Admin Back Navigation Fix**: Fixed back navigation from admin subscreens (matches, tournaments, fields, players) to correctly return to admin dashboard at `/(app)/(tabs)/admin` instead of incorrect `/(app)/(admin)/` path
+- **Admin Tabs Visibility Fix**: Hidden admin subscreens (matches, tournaments, fields, players) from bottom navigation bar - only main Admin tab is visible using `tabBarButton: () => null`
+- **Profile Screen Removal**: Completely removed profile screen and all related files (index, edit, settings, notifications, followed-teams) per user request to simplify the app
+- **Admin Item Management**: Added delete buttons with confirmation dialogs to admin management screens for tournaments, fields (locations), and players. Each item now has edit and delete icons with proper warning modals before deletion.
+- **Aria-Hidden Focus Warning Fix**: Fixed "Blocked aria-hidden on an element because its descendant retained focus" warning on web by creating SafeModal wrapper component that blurs active elements before modal opens. Replaced all Modal imports with SafeModal in matches/create.tsx, matches/[id].tsx, and all admin screens.
+- **Match Edit Routing Fix**: Fixed edit match button routing from admin matches screen. The button was trying to route to non-existent `/edit` path. Now correctly routes to `/create?id={matchId}` which opens the create screen in edit mode.
+- **Match Edit Functionality**: Added full match editing capabilities including:
+  - Loading existing match data when in edit mode (teams, field, tournament, scheduled time, lineups)
+  - Ability to update all match details and reassign players to teams
+  - Delete existing lineups and create new ones when updating a match
+  - UI updates to show "Edit Match" title and "Update Match" button when in edit mode
+- **Match Edit Autofill Fix**: Fixed issue where existing match data wasn't being properly loaded in edit mode:
+  - Resolved race condition where player selections were being cleared by team change useEffects
+  - Added isInitialLoad flag to prevent resetting players during data load
+  - Added setTimeout to ensure lineups are loaded after team IDs are set
+  - Added loading state indicator while fetching existing match data
+  - Now all match details (teams, field, tournament, time, player lineups) are correctly pre-populated when editing
+- **Player Statistics Fix**: Fixed player detail pages not showing correct statistics:
+  - Created SQL functions `get_player_stats` and `get_player_recent_matches` to calculate player data
+  - Updated player detail screen to display recent matches with scores and results
+  - Added visual indicators for wins/losses and goals scored in each match
+  - Created PLAYER_STATS_FIX.md with instructions for applying database functions via Supabase dashboard
+- **Tournaments Feature**: Added complete tournaments functionality:
+  - Created tournaments list screen with search and status badges (Upcoming/Live/Completed)
+  - Built tournament detail screen with team standings showing W-L records, points, and goal difference
+  - Integrated tournament statistics (teams, matches, goals, average goals per match)
+  - Added tournaments tab to bottom navigation between Home and Teams tabs
+  - Utilized existing tournament API endpoints including `get_tournament_standings` RPC function
 
-Ready for Step 9: Match Detail Screen with scoreboard, timeline, and team lineups.
+- **Tabbar Order/Label Fix**: Ensured Tournaments tab appears between Home and Teams and corrected Admin tab label (no longer shows `admin/index`).
+
+Ready for additional admin features and tournament management.
+
+### 📦 New Migration Added
+- Added `supabase/migrations/005_seed_midwest_open_more.sql` to seed additional USPA 14G Midwest Open historical matches (Aug 10, 12, 14, 16 2025), including idempotent upserts for fields/teams/players and per-chukker events with penalties.
+
+### 🔧 Build Readiness (Expo Doctor) - 2025-08-21
+- [x] Removed static `app.json` (using `app.config.ts`)
+- [x] Uninstalled local `eas-cli` (use `npx eas ...`)
+- [x] Uninstalled `@types/react-native` (types included in RN)
+- [x] Installed required peer `expo-font`
+- [x] Synced SDK 53-compatible package versions (`npx expo install --check`)
+- [x] Aligned React/ReactDOM to 19.0.0 for SDK 53
+- [x] Re-ran Expo Doctor → 16/17 checks passed (remaining: RN Directory advisory; non-blocker)
+- [x] Re-ran TypeScript check → errors remain to address
+
+Next steps:
+- [ ] Fix TypeScript errors in hooks and API slices (imports, optimistic update typings)
+- [ ] Adjust Supabase `.order` options to supported fields
