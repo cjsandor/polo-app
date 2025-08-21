@@ -378,3 +378,7 @@ Next steps:
 
 ### 🔧 Build Fix - 2025-08-21
 - Pinned devDependency `react-test-renderer` to `19.0.0` to match `react@19.0.0` and resolve EAS npm peer dependency conflict (`react-test-renderer@19.1.1` required `react@^19.1.1`).
+
+### 🔧 EAS Submit Configuration - 2025-08-21
+- [x] Added App Store Connect `ascAppId` (`6751362915`) to `eas.json` under `submit.production.ios`
+- [x] Set `ios.infoPlist.ITSAppUsesNonExemptEncryption = false` in `app.config.ts` to satisfy TestFlight/App Store encryption declaration
