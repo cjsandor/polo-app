@@ -374,3 +374,6 @@ Ready for additional admin features and tournament management.
 Next steps:
 - [ ] Fix TypeScript errors in hooks and API slices (imports, optimistic update typings)
 - [ ] Adjust Supabase `.order` options to supported fields
+
+### 🔧 Build Fix - 2025-08-21
+- Pinned devDependency `react-test-renderer` to `19.0.0` to match `react@19.0.0` and resolve EAS npm peer dependency conflict (`react-test-renderer@19.1.1` required `react@^19.1.1`).
