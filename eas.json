@@ -4,14 +4,14 @@
       "development": {
         "developmentClient": true,
         "distribution": "internal",
-        "env": { "EAS_PROJECT_ID": "6398563f-86be-4ff3-9e2c-88c2c4f4d965" }
+        "env": { "EAS_PROJECT_ID": "028c4ebb-6add-4483-a07f-0a2b22ba967f" }
       },
       "preview": {
         "distribution": "internal",
-        "env": { "EAS_PROJECT_ID": "6398563f-86be-4ff3-9e2c-88c2c4f4d965" }
+        "env": { "EAS_PROJECT_ID": "028c4ebb-6add-4483-a07f-0a2b22ba967f" }
       },
       "production": {
-        "env": { "EAS_PROJECT_ID": "6398563f-86be-4ff3-9e2c-88c2c4f4d965" }
+        "env": { "EAS_PROJECT_ID": "028c4ebb-6add-4483-a07f-0a2b22ba967f" }
       }
     },
     "submit": { "production": {} }
