@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Polo Match Tracker",
-    "slug": "polo-match-tracker",
+    "name": "Passion For Polo",
+    "slug": "passion-for-polo",
     "scheme": "polotracker",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,7 +17,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.polomatchtracker"
+      "bundleIdentifier": "com.cjsandor.passionforpolo"
     },
     "android": {
       "package": "com.yourcompany.polomatchtracker",

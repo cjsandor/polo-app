@@ -1,5 +1,5 @@
 {
-    "cli": { "requireCommit": true },
+    "cli": { "requireCommit": true, "appVersionSource": "remote" },
     "build": {
       "development": {
         "developmentClient": true,
