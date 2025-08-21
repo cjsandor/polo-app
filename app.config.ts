@@ -21,12 +21,12 @@ validateEnvVars();
 const environment = process.env.EXPO_PUBLIC_ENVIRONMENT || "development";
 const isProduction = environment === "production";
 const easProjectId = process.env.EAS_PROJECT_ID ||
-  "6398563f-86be-4ff3-9e2c-88c2c4f4d965";
+  "028c4ebb-6add-4483-a07f-0a2b22ba967f";
 
 export default {
   expo: {
-    name: process.env.EXPO_PUBLIC_APP_NAME || "Polo Match Tracker",
-    slug: "polo-match-tracker",
+    name: process.env.EXPO_PUBLIC_APP_NAME || "Passion For Polo",
+    slug: "passion-for-polo",
     owner: "cjsandor",
     scheme: "polotracker",
     version: process.env.EXPO_PUBLIC_APP_VERSION || "1.0.0",
@@ -43,10 +43,10 @@ export default {
     ],
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.yourcompany.polomatchtracker",
+      bundleIdentifier: "com.cjsandor.passionforpolo",
     },
     android: {
-      package: "com.yourcompany.polomatchtracker",
+      package: "com.cjsandor.passionforpolo",
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#FFFFFF",
