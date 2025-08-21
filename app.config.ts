@@ -25,6 +25,7 @@ export default {
   expo: {
     name: process.env.EXPO_PUBLIC_APP_NAME || "Polo Match Tracker",
     slug: "polo-match-tracker",
+    owner: "cjsandor",
     scheme: "polotracker",
     version: process.env.EXPO_PUBLIC_APP_VERSION || "1.0.0",
     orientation: "portrait",
@@ -70,7 +71,7 @@ export default {
     },
     runtimeVersion: { policy: "sdkVersion" },
     updates: {
-      url: isProduction ? "https://u.expo.dev/your-project-id" : undefined,
+      url: isProduction ? "https://u.expo.dev/6398563f-86be-4ff3-9e2c-88c2c4f4d965" : undefined,
     },
     extra: {
       // Supabase configuration
@@ -85,7 +86,7 @@ export default {
 
       // EAS configuration
       eas: {
-        projectId: process.env.EAS_PROJECT_ID || "",
+        projectId: "6398563f-86be-4ff3-9e2c-88c2c4f4d965",
       },
     },
   },
