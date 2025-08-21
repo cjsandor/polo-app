@@ -215,6 +215,7 @@ Building a real-time polo match tracking app with Expo SDK 49, TypeScript, and S
 - [ ] Create E2E tests with Detox
 
 ### 25. EAS Configuration ⏳
+- [x] Link EAS project and set owner/projectId in dynamic config
 - [ ] Configure EAS Build for iOS/Android
 - [ ] Set up EAS Update for OTA updates
 - [ ] Create build profiles (dev/staging/prod)

@@ -20,6 +20,8 @@ validateEnvVars();
 
 const environment = process.env.EXPO_PUBLIC_ENVIRONMENT || "development";
 const isProduction = environment === "production";
+const easProjectId = process.env.EAS_PROJECT_ID ||
+  "6398563f-86be-4ff3-9e2c-88c2c4f4d965";
 
 export default {
   expo: {
@@ -71,7 +73,7 @@ export default {
     },
     runtimeVersion: { policy: "sdkVersion" },
     updates: {
-      url: isProduction ? "https://u.expo.dev/6398563f-86be-4ff3-9e2c-88c2c4f4d965" : undefined,
+      url: isProduction ? `https://u.expo.dev/${easProjectId}` : undefined,
     },
     extra: {
       // Supabase configuration
@@ -86,7 +88,7 @@ export default {
 
       // EAS configuration
       eas: {
-        projectId: "6398563f-86be-4ff3-9e2c-88c2c4f4d965",
+        projectId: easProjectId,
       },
     },
   },

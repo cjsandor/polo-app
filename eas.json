@@ -1,9 +1,18 @@
 {
     "cli": { "requireCommit": true },
     "build": {
-      "development": { "developmentClient": true, "distribution": "internal" },
-      "preview": { "distribution": "internal" },
-      "production": {}
+      "development": {
+        "developmentClient": true,
+        "distribution": "internal",
+        "env": { "EAS_PROJECT_ID": "6398563f-86be-4ff3-9e2c-88c2c4f4d965" }
+      },
+      "preview": {
+        "distribution": "internal",
+        "env": { "EAS_PROJECT_ID": "6398563f-86be-4ff3-9e2c-88c2c4f4d965" }
+      },
+      "production": {
+        "env": { "EAS_PROJECT_ID": "6398563f-86be-4ff3-9e2c-88c2c4f4d965" }
+      }
     },
     "submit": { "production": {} }
   }
