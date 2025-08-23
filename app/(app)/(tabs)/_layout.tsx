@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Tabs Layout
  * Main bottom tab navigation
  */
@@ -9,121 +9,147 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuthContext } from "../../../src/contexts/AuthContext";
 import { COLORS } from "../../../src/config/constants";
 
+type TabIconSet = { focused: string; unfocused: string };
+type TabConfig = {
+  key: string;
+  name: string;
+  label: string;
+  icon: TabIconSet;
+  options: Record<string, any>;
+  iconSize?: number;
+  adminOnly?: boolean;
+};
+
+export const TAB_CONFIG: TabConfig[] = [
+  {
+    key: "matches",
+    name: "matches/index",
+    label: "Home",
+    icon: { focused: "football", unfocused: "football-outline" },
+    options: {
+      title: "Home",
+      tabBarLabel: "Home",
+      tabBarBadge: undefined, // Can add live match count here
+    },
+  },
+  {
+    key: "tournaments",
+    name: "tournaments/index",
+    label: "Tournaments",
+    icon: { focused: "trophy", unfocused: "trophy-outline" },
+    options: {
+      title: "Tournaments",
+      tabBarLabel: "Tournaments",
+    },
+  },
+  {
+    key: "teams",
+    name: "teams/index",
+    label: "Teams",
+    icon: { focused: "people", unfocused: "people-outline" },
+    options: {
+      title: "Teams",
+      tabBarLabel: "Teams",
+    },
+  },
+  {
+    key: "players",
+    name: "players/index",
+    label: "Players",
+    icon: { focused: "person", unfocused: "person-outline" },
+    options: {
+      title: "Players",
+      tabBarLabel: "Players",
+    },
+  },
+  {
+    key: "admin",
+    name: "admin/index",
+    label: "Admin",
+    icon: { focused: "shield", unfocused: "shield-outline" },
+    iconSize: 22,
+    options: {
+      title: "Admin",
+      tabBarLabel: "Admin",
+    },
+    adminOnly: true,
+  },
+];
+
+const getTabIcon = (name: string, focused: boolean) => {
+  const tab = TAB_CONFIG.find((t) => t.key === name);
+  if (!tab) return "circle-outline";
+  return focused ? tab.icon.focused : tab.icon.unfocused;
+};
+
+const screenOptions = ({ route }: { route: any }) => {
+  const baseName = route.name.replace("/index", "").split("/")[0];
+  const tab = TAB_CONFIG.find((t) => t.key === baseName);
+
+  return {
+    headerShown: false,
+    tabBarStyle: {
+      backgroundColor: "#FFFFFF",
+      borderTopColor: "#E0E0E0",
+      borderTopWidth: 1,
+      height: 65,
+      paddingBottom: 10,
+      paddingTop: 10,
+      paddingHorizontal: 0,
+      elevation: 0,
+      justifyContent: "space-between",
+    },
+    tabBarActiveTintColor: COLORS.PRIMARY,
+    tabBarInactiveTintColor: "#757575",
+    tabBarLabelStyle: {
+      fontSize: 11,
+      fontWeight: "600",
+      marginTop: 4,
+      marginBottom: 0,
+      textAlign: "center",
+      alignSelf: "center",
+    },
+    tabBarIconStyle: {
+      marginTop: 0,
+      alignSelf: "center",
+      width: 24,
+    },
+    tabBarItemStyle: {
+      flex: 1,
+      paddingVertical: 5,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    tabBarLabel: tab?.label || route.name,
+    tabBarIcon: ({
+      focused,
+      color,
+      size,
+    }: {
+      focused: boolean;
+      color: string;
+      size: number;
+    }) => {
+      const iconName = getTabIcon(baseName, focused);
+      const iconSize = tab?.iconSize || size;
+      return <Ionicons name={iconName as any} size={iconSize} color={color} />;
+    },
+  };
+};
+
 export default function TabsLayout() {
   const { isAdmin } = useAuthContext();
-
-  const getTabIcon = (name: string, focused: boolean) => {
-    const iconMap: Record<string, string> = {
-      matches: focused ? "football" : "football-outline",
-      tournaments: focused ? "trophy" : "trophy-outline",
-      teams: focused ? "people" : "people-outline",
-      players: focused ? "person" : "person-outline",
-      admin: focused ? "shield" : "shield-outline",
-    };
-
-    return iconMap[name] || "circle-outline";
-  };
+  const tabs = React.useMemo(
+    () => TAB_CONFIG.filter((tab) => !tab.adminOnly || isAdmin),
+    [isAdmin]
+  );
 
   return (
-    <Tabs
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: "#FFFFFF",
-          borderTopColor: "#E0E0E0",
-          borderTopWidth: 1,
-          height: 65,
-          paddingBottom: 10,
-          paddingTop: 10,
-          paddingHorizontal: 0,
-          elevation: 0,
-          justifyContent: "space-between",
-        },
-        tabBarActiveTintColor: COLORS.PRIMARY,
-        tabBarInactiveTintColor: "#757575",
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: "600",
-          marginTop: 4,
-          marginBottom: 0,
-          textAlign: "center",
-          alignSelf: "center",
-        },
-        tabBarIconStyle: {
-          marginTop: 0,
-          alignSelf: "center",
-          width: 24,
-        },
-        tabBarItemStyle: {
-          flex: 1,
-          paddingVertical: 5,
-          alignItems: "center",
-          justifyContent: "center",
-        },
-        tabBarLabel: (() => {
-          const baseName = route.name.replace("/index", "").split("/")[0];
-          const labels: Record<string, string> = {
-            matches: "Home",
-            tournaments: "Tournaments",
-            teams: "Teams",
-            players: "Players",
-            admin: "Admin",
-          };
-          return labels[baseName] || labels[route.name] || route.name;
-        })(),
-        tabBarIcon: ({ focused, color, size }) => {
-          const routeName = route.name.replace("/index", "").split("/")[0]; // Get base route name
-          const iconName = getTabIcon(routeName, focused);
-          return <Ionicons name={iconName as any} size={24} color={color} />;
-        },
-      })}
-    >
-      <Tabs.Screen
-        name="matches/index"
-        options={{
-          title: "Home",
-          tabBarLabel: "Home",
-          tabBarBadge: undefined, // Can add live match count here
-        }}
-      />
-      <Tabs.Screen
-        name="tournaments/index"
-        options={{
-          title: "Tournaments",
-          tabBarLabel: "Tournaments",
-        }}
-      />
-      <Tabs.Screen
-        name="teams/index"
-        options={{
-          title: "Teams",
-          tabBarLabel: "Teams",
-        }}
-      />
-      <Tabs.Screen
-        name="players/index"
-        options={{
-          title: "Players",
-          tabBarLabel: "Players",
-        }}
-      />
+    <Tabs screenOptions={screenOptions}>
+      {tabs.map((tab) => (
+        <Tabs.Screen key={tab.name} name={tab.name} options={tab.options} />
+      ))}
 
-      {isAdmin && (
-        <Tabs.Screen
-          name="admin/index"
-          options={{
-            title: "Admin",
-            tabBarLabel: "Admin",
-            tabBarIcon: ({ focused, color, size }) => (
-              <Ionicons
-                name={focused ? "shield" : "shield-outline"}
-                size={22}
-                color={color}
-              />
-            ),
-          }}
-        />
-      )}
       {/* Hidden admin subscreens - not shown in tabs */}
       <Tabs.Screen
         name="admin/matches"
@@ -184,3 +210,4 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
+
