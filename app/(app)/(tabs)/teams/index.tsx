@@ -11,7 +11,6 @@ import {
   FlatList,
   RefreshControl,
   TouchableOpacity,
-  TextInput,
   SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,13 +18,16 @@ import { useRouter } from "expo-router";
 
 // Components
 import { LoadingSpinner } from "../../../../src/components/ui/LoadingSpinner";
+import { Header } from "../../../../src/components/ui/Header";
+import { SearchBar } from "../../../../src/components/ui/SearchBar";
 
 // API Hooks
 import { useGetTeamsQuery } from "../../../../src/store/api/slices/teamsApi";
 
 // Types & Constants
 import type { Team } from "../../../../src/types/database";
-import { COLORS, UI } from "../../../../src/config/constants";
+import { COLORS } from "../../../../src/config/constants";
+import { TeamCard } from "../../../../src/components/cards/TeamCard";
 
 export default function TeamsScreen() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -76,29 +78,13 @@ export default function TeamsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Teams</Text>
-      </View>
+      <Header title="Teams" />
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color="#999" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search teams..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholderTextColor="#999"
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery("")}>
-              <Ionicons name="close-circle" size={20} color="#999" />
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
+      <SearchBar
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        placeholder="Search teams..."
+      />
 
       {/* Content */}
       <View style={styles.content}>
@@ -127,153 +113,16 @@ export default function TeamsScreen() {
   );
 }
 
-// Team Card Component
-const TeamCard: React.FC<{
-  team: Team;
-  onPress: () => void;
-}> = ({ team, onPress }) => {
-  return (
-    <TouchableOpacity style={styles.teamCard} onPress={onPress}>
-      <View style={styles.teamInfo}>
-        {/* Team Logo */}
-        <View style={styles.teamLogo}>
-          <Ionicons name="shield" size={32} color={COLORS.PRIMARY} />
-        </View>
-
-        {/* Team Details */}
-        <View style={styles.teamDetails}>
-          <Text style={styles.teamName}>{team.name}</Text>
-          {team.home_field?.name && (
-            <View style={styles.detailRow}>
-              <Ionicons name="location-outline" size={16} color="#666" />
-              <Text style={styles.detailText}>{team.home_field.name}</Text>
-            </View>
-          )}
-          <View style={styles.detailRow}>
-            <Ionicons name="people-outline" size={16} color="#666" />
-            <Text style={styles.detailText}>
-              {team.players?.length || 0} Players
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Actions */}
-      <View style={styles.teamActions}>
-        <Ionicons name="chevron-forward" size={20} color="#ccc" />
-      </View>
-    </TouchableOpacity>
-  );
-};
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f9fa",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  searchContainer: {
-    backgroundColor: "#fff",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f5f5f5",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    marginLeft: 8,
-    color: "#333",
   },
   content: {
     flex: 1,
   },
   listContent: {
     paddingBottom: 16,
-  },
-  teamCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    marginHorizontal: 16,
-    marginVertical: 8,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    // Shadow for iOS
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    // Shadow for Android
-    elevation: 3,
-  },
-  teamInfo: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  teamLogo: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#f5f5f5",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 16,
-  },
-  teamDetails: {
-    flex: 1,
-  },
-  teamName: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 4,
-  },
-  detailRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  detailText: {
-    fontSize: 14,
-    color: "#666",
-    marginLeft: 6,
-  },
-  teamActions: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  followButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: `${COLORS.PRIMARY}15`,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
   },
   emptyState: {
     flex: 1,

@@ -8,79 +8,7 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthContext } from "../../../src/contexts/AuthContext";
 import { COLORS } from "../../../src/config/constants";
-
-type TabIconSet = { focused: string; unfocused: string };
-type TabConfig = {
-  key: string;
-  name: string;
-  label: string;
-  icon: TabIconSet;
-  options: Record<string, any>;
-  iconSize?: number;
-  adminOnly?: boolean;
-};
-
-export const TAB_CONFIG: TabConfig[] = [
-  {
-    key: "matches",
-    name: "matches/index",
-    label: "Home",
-    icon: { focused: "football", unfocused: "football-outline" },
-    options: {
-      title: "Home",
-      tabBarLabel: "Home",
-      tabBarBadge: undefined, // Can add live match count here
-    },
-  },
-  {
-    key: "tournaments",
-    name: "tournaments/index",
-    label: "Tournaments",
-    icon: { focused: "trophy", unfocused: "trophy-outline" },
-    options: {
-      title: "Tournaments",
-      tabBarLabel: "Tournaments",
-    },
-  },
-  {
-    key: "teams",
-    name: "teams/index",
-    label: "Teams",
-    icon: { focused: "people", unfocused: "people-outline" },
-    options: {
-      title: "Teams",
-      tabBarLabel: "Teams",
-    },
-  },
-  {
-    key: "players",
-    name: "players/index",
-    label: "Players",
-    icon: { focused: "person", unfocused: "person-outline" },
-    options: {
-      title: "Players",
-      tabBarLabel: "Players",
-    },
-  },
-  {
-    key: "admin",
-    name: "admin/index",
-    label: "Admin",
-    icon: { focused: "shield", unfocused: "shield-outline" },
-    iconSize: 22,
-    options: {
-      title: "Admin",
-      tabBarLabel: "Admin",
-    },
-    adminOnly: true,
-  },
-];
-
-const getTabIcon = (name: string, focused: boolean) => {
-  const tab = TAB_CONFIG.find((t) => t.key === name);
-  if (!tab) return "circle-outline";
-  return focused ? tab.icon.focused : tab.icon.unfocused;
-};
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const screenOptions = ({ route }: { route: any }) => {
   const baseName = route.name.replace("/index", "").split("/")[0];
@@ -145,11 +73,6 @@ export default function TabsLayout() {
   );
 
   return (
-    <Tabs screenOptions={screenOptions}>
-      {tabs.map((tab) => (
-        <Tabs.Screen key={tab.name} name={tab.name} options={tab.options} />
-      ))}
-
       {/* Hidden admin subscreens - not shown in tabs */}
       <Tabs.Screen
         name="admin/matches"
