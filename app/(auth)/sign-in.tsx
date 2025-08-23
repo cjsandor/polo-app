@@ -46,36 +46,50 @@ export default function SignInScreen() {
   const createTest = async (
     targetEmail: string,
     targetPassword: string,
-    role: "admin" | "viewer"
+    role: "admin" | "viewer",
   ) => {
     setLoading(true);
     try {
-      // Try to sign in first (if account already exists)
-      const signInRes = await auth.signIn(targetEmail, targetPassword);
-      if (signInRes.error) {
-        // Attempt to sign up if sign-in failed
-        const signUpRes = await auth.signUp(targetEmail, targetPassword, {
-          role,
-        });
-        if (signUpRes.error) {
-          // Surface the exact error for troubleshooting (e.g., redirect URL not allowed)
-          console.log("signUp error:", signUpRes.error);
-          throw signUpRes.error;
+      const { error: signInError } = await auth.signIn(
+        targetEmail,
+        targetPassword,
+      );
+      if (signInError) {
+        if (signInError.message?.includes("Invalid login credentials")) {
+          const { error: signUpError } = await auth.signUp(
+            targetEmail,
+            targetPassword,
+            { role },
+          );
+          if (signUpError) {
+            Alert.alert("Error", signUpError.message || "Could not sign up");
+            return;
+          }
+        } else {
+          Alert.alert("Error", signInError.message || "Sign in failed");
+          return;
         }
-        // After sign up, try sign-in again (email confirmations may be required depending on project settings)
-        const retry = await auth.signIn(targetEmail, targetPassword);
-        if (retry.error) throw retry.error;
       }
 
-      // Ensure profile role is set
-      const { user } = (await (
-        await auth.getUser()
-      ).user)
-        ? await auth.getUser()
-        : ({ user: null } as any);
+      const { user, error: userError } = await auth.getUser();
+      if (userError || !user) {
+        Alert.alert(
+          "Error",
+          userError?.message || "Could not retrieve authenticated user",
+        );
+        return;
+      }
 
-      if (user?.id) {
-        await db.profiles.upsert({ id: user.id, role });
+      const { error: profileError } = await db.profiles.upsert({
+        id: user.id,
+        role,
+      });
+      if (profileError) {
+        Alert.alert(
+          "Error",
+          profileError.message || "Could not update profile role",
+        );
+        return;
       }
 
       Alert.alert("Success", `Signed in as ${targetEmail}`);
@@ -84,7 +98,7 @@ export default function SignInScreen() {
       Alert.alert(
         "Error",
         e?.message ||
-          "Could not create test account. If email confirmations are required, check your inbox."
+          "Could not create test account. If email confirmations are required, check your inbox.",
       );
     } finally {
       setLoading(false);
