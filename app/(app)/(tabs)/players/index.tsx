@@ -11,7 +11,6 @@ import {
   FlatList,
   RefreshControl,
   TouchableOpacity,
-  TextInput,
   SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,6 +18,8 @@ import { useRouter } from "expo-router";
 
 // Components
 import { LoadingSpinner } from "../../../../src/components/ui/LoadingSpinner";
+import { Header } from "../../../../src/components/ui/Header";
+import { SearchBar } from "../../../../src/components/ui/SearchBar";
 
 // API Hooks
 import {
@@ -139,29 +140,13 @@ export default function PlayersScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Players</Text>
-      </View>
+      <Header title="Players" />
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color="#999" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search players or teams..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholderTextColor="#999"
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery("")}>
-              <Ionicons name="close-circle" size={20} color="#999" />
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
+      <SearchBar
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        placeholder="Search players or teams..."
+      />
 
       {/* Filters */}
       {renderHandicapFilter()}
@@ -270,42 +255,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f9fa",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  searchContainer: {
-    backgroundColor: "#fff",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f5f5f5",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    marginLeft: 8,
-    color: "#333",
   },
   filtersContainer: {
     backgroundColor: "#fff",
