@@ -8,9 +8,11 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthContext } from "../../../src/contexts/AuthContext";
 import { COLORS } from "../../../src/config/constants";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabsLayout() {
   const { isAdmin } = useAuthContext();
+  const insets = useSafeAreaInsets();
 
   const getTabIcon = (name: string, focused: boolean) => {
     const iconMap: Record<string, string> = {
@@ -32,8 +34,8 @@ export default function TabsLayout() {
           backgroundColor: "#FFFFFF",
           borderTopColor: "#E0E0E0",
           borderTopWidth: 1,
-          height: 65,
-          paddingBottom: 10,
+          height: 55 + insets.bottom,
+          paddingBottom: insets.bottom || 10,
           paddingTop: 10,
           paddingHorizontal: 0,
           elevation: 0,

@@ -6,7 +6,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { auth, db } from "../../src/services/supabase";
@@ -88,71 +92,81 @@ export default function SignInScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Sign In</Text>
-
-      <View style={styles.field}>
-        <Ionicons name="mail-outline" size={18} color="#666" />
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-        />
-      </View>
-
-      <View style={styles.field}>
-        <Ionicons name="lock-closed-outline" size={18} color="#666" />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-      </View>
-
-      <TouchableOpacity
-        style={[styles.button, loading && { opacity: 0.7 }]}
-        onPress={handleSignIn}
-        disabled={loading}
+    <SafeAreaView style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <Text style={styles.buttonText}>
-          {loading ? "Please wait..." : "Sign In"}
-        </Text>
-      </TouchableOpacity>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.title}>Sign In</Text>
 
-      <View style={styles.hr} />
+          <View style={styles.field}>
+            <Ionicons name="mail-outline" size={18} color="#666" />
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+            />
+          </View>
 
-      <Text style={styles.subhead}>Quick setup (dev only)</Text>
-      <TouchableOpacity
-        style={styles.secondaryButton}
-        onPress={() =>
-          createTest("test.user@example.com", "Test1234!", "viewer")
-        }
-        disabled={loading}
-      >
-        <Text style={styles.secondaryText}>Create Test User</Text>
-      </TouchableOpacity>
+          <View style={styles.field}>
+            <Ionicons name="lock-closed-outline" size={18} color="#666" />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+            />
+          </View>
 
-      <TouchableOpacity
-        style={styles.secondaryButton}
-        onPress={() =>
-          createTest("test.admin@example.com", "Test1234!", "admin")
-        }
-        disabled={loading}
-      >
-        <Text style={styles.secondaryText}>Create Test Admin</Text>
-      </TouchableOpacity>
-    </View>
+          <TouchableOpacity
+            style={[styles.button, loading && { opacity: 0.7 }]}
+            onPress={handleSignIn}
+            disabled={loading}
+          >
+            <Text style={styles.buttonText}>
+              {loading ? "Please wait..." : "Sign In"}
+            </Text>
+          </TouchableOpacity>
+
+          <View style={styles.hr} />
+
+          <Text style={styles.subhead}>Quick setup (dev only)</Text>
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={() =>
+              createTest("test.user@example.com", "Test1234!", "viewer")
+            }
+            disabled={loading}
+          >
+            <Text style={styles.secondaryText}>Create Test User</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={() =>
+              createTest("test.admin@example.com", "Test1234!", "admin")
+            }
+            disabled={loading}
+          >
+            <Text style={styles.secondaryText}>Create Test Admin</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: "#fff",
     padding: 20,
     alignItems: "stretch",
