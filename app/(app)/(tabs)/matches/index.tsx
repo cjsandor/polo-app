@@ -3,7 +3,7 @@
  * Displays matches in tabs: Upcoming, Live, Completed
  */
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -22,9 +22,9 @@ import { LoadingSpinner } from "../../../../src/components/ui/LoadingSpinner";
 
 // API Hooks
 import {
-  useGetUpcomingMatchesQuery,
-  useGetLiveMatchesQuery,
-  useGetMatchesByStatusQuery,
+  useLazyGetUpcomingMatchesQuery,
+  useLazyGetLiveMatchesQuery,
+  useLazyGetMatchesByStatusQuery,
 } from "../../../../src/store/api/slices/matchesApi";
 
 // Types & Constants
@@ -46,53 +46,64 @@ export default function MatchesScreen() {
   const isAdmin = useIsAdmin();
   const isAuthenticated = useIsAuthenticated();
 
-  // API Queries
-  const {
-    data: upcomingMatches,
-    isLoading: upcomingLoading,
-    refetch: refetchUpcoming,
-  } = useGetUpcomingMatchesQuery();
+  // API Queries (lazy)
+  const [
+    fetchUpcomingMatches,
+    { data: upcomingMatches, isFetching: upcomingLoading },
+  ] = useLazyGetUpcomingMatchesQuery();
 
-  const {
-    data: liveMatches,
-    isLoading: liveLoading,
-    refetch: refetchLive,
-  } = useGetLiveMatchesQuery();
+  const [fetchLiveMatches, { data: liveMatches, isFetching: liveLoading }] =
+    useLazyGetLiveMatchesQuery();
 
-  const {
-    data: completedMatches,
-    isLoading: completedLoading,
-    refetch: refetchCompleted,
-  } = useGetMatchesByStatusQuery("completed");
+  const [
+    fetchCompletedMatches,
+    { data: completedMatches, isFetching: completedLoading },
+  ] = useLazyGetMatchesByStatusQuery();
+
+  // Trigger appropriate query when tab becomes active
+  useEffect(() => {
+    switch (activeTab) {
+      case "upcoming":
+        fetchUpcomingMatches();
+        break;
+      case "live":
+        fetchLiveMatches();
+        break;
+      case "completed":
+        fetchCompletedMatches("completed");
+        break;
+    }
+  }, [
+    activeTab,
+    fetchUpcomingMatches,
+    fetchLiveMatches,
+    fetchCompletedMatches,
+  ]);
 
   const getCurrentData = (): {
     data: Match[] | undefined;
     isLoading: boolean;
-    refetch: () => void;
   } => {
     switch (activeTab) {
       case "upcoming":
         return {
           data: upcomingMatches,
           isLoading: upcomingLoading,
-          refetch: refetchUpcoming,
         };
       case "live":
         return {
           data: liveMatches,
           isLoading: liveLoading,
-          refetch: refetchLive,
         };
       case "completed":
         return {
           data: completedMatches,
           isLoading: completedLoading,
-          refetch: refetchCompleted,
         };
     }
   };
 
-  const { data: currentData, isLoading, refetch } = getCurrentData();
+  const { data: currentData, isLoading } = getCurrentData();
 
   const handleMatchPress = useCallback(
     (match: Match) => {
@@ -102,8 +113,18 @@ export default function MatchesScreen() {
   );
 
   const handleRefresh = useCallback(() => {
-    refetch();
-  }, [refetch]);
+    switch (activeTab) {
+      case "upcoming":
+        fetchUpcomingMatches();
+        break;
+      case "live":
+        fetchLiveMatches();
+        break;
+      case "completed":
+        fetchCompletedMatches("completed");
+        break;
+    }
+  }, [activeTab, fetchUpcomingMatches, fetchLiveMatches, fetchCompletedMatches]);
 
   const renderTabButton = (tab: (typeof TABS)[0]) => {
     const isActive = activeTab === tab.key;
