@@ -9,11 +9,11 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ImageBackground,
+  useWindowDimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { Match } from "../../types/database";
-import { COLORS, POLO } from "../../config/constants";
+import { COLORS } from "../../config/constants";
 
 interface MatchCardProps {
   match: Match;
@@ -21,6 +21,7 @@ interface MatchCardProps {
 }
 
 export const MatchCard: React.FC<MatchCardProps> = ({ match, onPress }) => {
+  const { width } = useWindowDimensions();
   const isLive = match.status === "live";
   const isCompleted = match.status === "completed";
   const isUpcoming = match.status === "scheduled";
@@ -116,7 +117,10 @@ export const MatchCard: React.FC<MatchCardProps> = ({ match, onPress }) => {
                   color={COLORS.PRIMARY}
                 />
               </View>
-              <Text style={styles.teamName} numberOfLines={1}>
+              <Text
+                style={[styles.teamName, { maxWidth: width * 0.25 }]}
+                numberOfLines={1}
+              >
                 {match.home_team?.name || "Home Team"}
               </Text>
             </View>
@@ -146,7 +150,10 @@ export const MatchCard: React.FC<MatchCardProps> = ({ match, onPress }) => {
                   color={COLORS.PRIMARY}
                 />
               </View>
-              <Text style={styles.teamName} numberOfLines={1}>
+              <Text
+                style={[styles.teamName, { maxWidth: width * 0.25 }]}
+                numberOfLines={1}
+              >
                 {match.away_team?.name || "Away Team"}
               </Text>
             </View>
@@ -268,7 +275,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#333",
     textAlign: "center",
-    maxWidth: 100,
   },
   teamScore: {
     fontSize: 24,
