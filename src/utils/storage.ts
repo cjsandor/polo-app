@@ -5,6 +5,7 @@
 
 import { storageAdapter } from "./storageAdapter";
 import { STORAGE_KEYS } from "../config/constants";
+import { Platform } from "react-native";
 
 export class Storage {
     /**
@@ -67,12 +68,32 @@ export class Storage {
      * Get all keys
      */
     static async getAllKeys(): Promise<string[]> {
-        // Note: Not all storage adapters support getAllKeys
-        // For web/localStorage, we'd need to iterate through keys
         try {
-            // This is a simplified implementation
-            // In a real scenario, you might want to maintain a key registry
-            return [];
+            // Web implementation uses localStorage keys directly
+            if (Platform.OS === "web") {
+                if (typeof window !== "undefined" && window.localStorage) {
+                    return Object.keys(window.localStorage);
+                }
+                return [];
+            }
+
+            // Native implementation: use adapter's getAllKeys if available
+            const adapterKeys = await (storageAdapter as any).getAllKeys?.();
+            if (Array.isArray(adapterKeys)) {
+                return adapterKeys;
+            }
+
+            // Fallback: iterate through known storage keys and return those that exist
+            const existingKeys: string[] = [];
+            await Promise.all(
+                Object.values(STORAGE_KEYS).map(async (key) => {
+                    const value = await storageAdapter.getItem(key);
+                    if (value !== null) {
+                        existingKeys.push(key);
+                    }
+                }),
+            );
+            return existingKeys;
         } catch (error) {
             console.error("Error getting all keys:", error);
             return [];
@@ -190,32 +211,37 @@ export const OfflineStorage = {
 export const StorageDebug = {
     getAllStoredData: async () => {
         const keys = await Storage.getAllKeys();
-        return Storage.getMultiple(keys);
+        const result: Record<string, any> = {};
+        await Promise.all(
+            keys.map(async (key) => {
+                const value = await Storage.getItem<any>(key);
+                if (value !== null) {
+                    result[key] = value;
+                }
+            }),
+        );
+        return result;
     },
 
     getStorageSize: async () => {
         try {
-            const keys = await Storage.getAllKeys();
-            const items = await Storage.getMultiple(keys);
+            const items = await StorageDebug.getAllStoredData();
 
             let totalSize = 0;
             const sizeByKey: Record<string, number> = {};
 
             Object.entries(items).forEach(([key, value]) => {
-                if (value !== null) {
-                    const valueStr = typeof value === "string"
-                        ? value
-                        : JSON.stringify(value);
-                    const size = new Blob([valueStr]).size;
-                    sizeByKey[key] = size;
-                    totalSize += size;
-                }
+                const valueStr =
+                    typeof value === "string" ? value : JSON.stringify(value);
+                const size = new Blob([valueStr]).size;
+                sizeByKey[key] = size;
+                totalSize += size;
             });
 
             return {
                 totalSize,
                 sizeByKey,
-                totalKeys: keys.length,
+                totalKeys: Object.keys(items).length,
             };
         } catch (error) {
             console.error("Error calculating storage size:", error);
